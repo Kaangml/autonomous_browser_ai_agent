@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any, Awaitable, Callable, Optional, TypeVar
 from urllib.parse import urlparse, urlunparse
+import random
 
 from playwright.async_api import Page, TimeoutError
 
@@ -56,9 +57,14 @@ class BrowserUtils:
         """Ensure URLs have a scheme and are stripped."""
 
         url = raw_url.strip()
+        # Preserve local file URLs as-is (safe for local fixtures)
+        if url.lower().startswith("file://"):
+            return url
+
         parsed = urlparse(url, scheme="https")
-        if not parsed.netloc and parsed.path:
-            # Handle cases like "example.com" (parsed as path)
+        # If the parsed result has no network location but some path (e.g. "example.com")
+        # only convert to https when the scheme is not 'file' so we don't mangle file paths.
+        if parsed.scheme != "file" and not parsed.netloc and parsed.path:
             parsed = urlparse(f"https://{url}")
         if not parsed.scheme:
             parsed = parsed._replace(scheme="https")
@@ -77,5 +83,19 @@ class BrowserUtils:
 
         info = details or {}
         print(f"[BrowserAction] {action_name} -> {info}")
+
+    @staticmethod
+    async def human_delay(min_seconds: float = 0.0, max_seconds: float = 0.0) -> None:
+        """Sleep for a small random time between min_seconds and max_seconds.
+
+        This helps mimic human pauses and reduce bot-like timing patterns in tests.
+        """
+
+        if min_seconds <= 0 and max_seconds <= 0:
+            return None
+        if max_seconds < min_seconds:
+            max_seconds = min_seconds
+        delay = random.uniform(min_seconds, max_seconds)
+        await asyncio.sleep(delay)
 
 

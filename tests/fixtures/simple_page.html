@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Playwright E2E Fixture</title>
+  </head>
+  <body>
+    <button id="btn">Click me</button>
+    <div id="result">Not clicked</div>
+
+    <script>
+      document.getElementById('btn').addEventListener('click', function () {
+        const el = document.getElementById('result');
+        el.innerText = 'Clicked';
+      });
+    </script>
+  </body>
+</html>

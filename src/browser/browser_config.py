@@ -17,6 +17,10 @@ class BrowserConfig:
     timeout: int  # seconds
     user_agent: str
     stealth: bool
+    channel: str | None = None
+    # human-delay in seconds range to add small random pauses for more human-like behavior
+    human_delay_min: float = 0.0
+    human_delay_max: float = 0.0
 
 
 class BrowserConfigManager:
@@ -71,6 +75,9 @@ class BrowserConfigManager:
             "timeout": timeout,
             "user_agent": user_agent.strip(),
             "stealth": bool(config_data.get("stealth", True)),
+            "channel": config_data.get("channel"),
+            "human_delay_min": float(config_data.get("human_delay_min", 0.0)),
+            "human_delay_max": float(config_data.get("human_delay_max", 0.0)),
         }
         return validated
 
@@ -86,6 +93,8 @@ class BrowserConfigManager:
             "launch": {
                 "headless": self.config.headless,
                 "args": launch_args if self.config.stealth else [],
+                # allow selecting a specific browser channel (e.g. 'chrome')
+                **({"channel": self.config.channel} if self.config.channel else {}),
             },
             "context": {
                 "viewport": self.config.viewport,

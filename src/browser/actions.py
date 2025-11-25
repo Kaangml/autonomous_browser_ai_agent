@@ -21,6 +21,11 @@ class BrowserActions:
 
         normalized_url = BrowserUtils.normalize_url(url)
         page = await self.browser_manager.new_page()
+        # small randomized delay for human-like behavior
+        await BrowserUtils.human_delay(
+            self.browser_manager.config_manager.config.human_delay_min,
+            self.browser_manager.config_manager.config.human_delay_max,
+        )
         timeout_ms = self._timeout_ms
 
         async def _navigate() -> None:
@@ -33,12 +38,20 @@ class BrowserActions:
         """Click an element after ensuring it exists."""
 
         await BrowserUtils.ensure_selector_exists(page, selector, self._timeout_ms)
+        await BrowserUtils.human_delay(
+            self.browser_manager.config_manager.config.human_delay_min,
+            self.browser_manager.config_manager.config.human_delay_max,
+        )
         await BrowserUtils.retry(lambda: page.click(selector, timeout=self._timeout_ms))
 
     async def fill(self, page: Page, selector: str, text: str) -> None:
         """Fill the input field with provided text."""
 
         await BrowserUtils.ensure_selector_exists(page, selector, self._timeout_ms)
+        await BrowserUtils.human_delay(
+            self.browser_manager.config_manager.config.human_delay_min,
+            self.browser_manager.config_manager.config.human_delay_max,
+        )
         await BrowserUtils.retry(lambda: page.fill(selector, text, timeout=self._timeout_ms))
 
     async def extract_text(self, page: Page, selector: str) -> str:
@@ -46,7 +59,21 @@ class BrowserActions:
 
         await BrowserUtils.ensure_selector_exists(page, selector, self._timeout_ms)
         text = await BrowserUtils.retry(lambda: page.inner_text(selector, timeout=self._timeout_ms))
-        return text.strip()
+        return BrowserUtils.sanitize_text(text)
+
+    async def extract_all_links(self, page: Page, selector: str | None = None) -> list[str]:
+        """Return list of hrefs found on the page or within a selector."""
+
+        async def _get_links() -> list[str]:
+            if selector:
+                # query selector for a container then get anchors
+                return await page.eval_on_selector_all(selector + " a", "nodes => nodes.map(n => n.href)")
+
+            # all <a> links on the page
+            return await page.eval_on_selector_all("a", "nodes => nodes.map(n => n.href)")
+
+        # rely on retry for flaky pages
+        return await BrowserUtils.retry(_get_links)
 
     async def scroll(self, page: Page, selector: Optional[str] = None) -> None:
         """Scroll either the whole page or a targeted element into view."""
@@ -70,6 +97,21 @@ class BrowserActions:
 
         timeout_ms = int((timeout or self.config_timeout) * 1000)
         await BrowserUtils.ensure_selector_exists(page, selector, timeout_ms)
+        await BrowserUtils.human_delay(
+            self.browser_manager.config_manager.config.human_delay_min,
+            self.browser_manager.config_manager.config.human_delay_max,
+        )
+
+    async def screenshot(self, page: Page, full_page: bool = False) -> bytes:
+        """Take a screenshot of the page; returns raw bytes.
+
+        Uses the configured timeout and a retry wrapper for stability.
+        """
+
+        async def _shot() -> bytes:
+            return await page.screenshot(full_page=full_page)
+
+        return await BrowserUtils.retry(_shot)
 
     @property
     def config_timeout(self) -> int:

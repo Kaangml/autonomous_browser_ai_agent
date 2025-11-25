@@ -62,3 +62,8 @@ async def test_element_exists_handles_timeout():
 
 def test_normalize_url_adds_scheme():
     assert BrowserUtils.normalize_url("example.com") == "https://example.com"
+
+
+def test_normalize_file_url_preserved():
+    raw = "file:///tmp/test.html"
+    assert BrowserUtils.normalize_url(raw) == raw

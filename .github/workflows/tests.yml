@@ -8,6 +8,9 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    env:
+      # do not run headful tests by default in CI
+      RUN_HEADFUL: '0'
 
     steps:
       - name: Checkout
