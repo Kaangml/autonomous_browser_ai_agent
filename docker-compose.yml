@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  browser-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      # LLM Provider - uncomment and set one
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.0-flash}
+      # - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      # - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4-turbo}
+      # Browser settings
+      - BROWSER_HEADLESS=true
+      - BROWSER_TIMEOUT=30
+    volumes:
+      # Mount screenshots output
+      - ./output:/app/output
+    # Run a specific task
+    command: [ "--url", "https://example.com", "--task", "extract the page title" ]
+
+  # Development mode with source code mounted
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.0-flash}
+      - BROWSER_HEADLESS=true
+    volumes:
+      - ./src:/app/src:ro
+      - ./output:/app/output
+    command: [ "--help" ]

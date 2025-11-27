@@ -1,148 +1,197 @@
----
+# 🗺️ Development Roadmap
 
-# 🚀 Autonomous Browser AI Agent
+## Project Vision
 
-## Development Direction (Faz 1 → Faz 2 Yol Haritası)
-
-Bu dosya, repoyu inceledikten sonra Faz 1 mevcut durumunu, Faz 2 için yol haritasını ve VS Code üzerinde nasıl ilerleyeceğinizi net bir şekilde açıklamak için hazırlandı. Aşağıdaki içeriği README altına veya /docs içinde `DEVELOPMENT_DIRECTION.md` olarak kullanabilirsiniz.
-
----
-
-## 1) Projenin Genel Amacı
-
-Bu proje, web tarayıcısını akıllı bir yazılım ajanı ile kontrol eden, görev odaklı, plan üretebilen ve kendini yöneten bir autonomous browser agent oluşturmayı hedefler. Sistem; `controller`, `browser`, `agent`, `config` katmanlarına ayrılmıştır. Bu modüler yapı sayesinde:
-
-- Test edilebilir
-- Genişletilebilir
-- Yeni görev tiplerine adapte edilebilir
-- Model veya tarayıcı kitaplığı kolayca değiştirilebilir
+Build an intelligent, autonomous browser agent that can:
+- Understand natural language tasks
+- Plan multi-step browser automations
+- Execute and self-correct using LLM intelligence
+- Work with minimal human intervention
 
 ---
 
-## 2) Faz 1 — Mevcut Durum Değerlendirmesi
+## Completed Phases ✅
 
-Faz 1 incelendiğinde aşağıdaki temel parçalar hazır:
+### Phase 1: Foundation (Completed)
+- [x] Project structure and architecture
+- [x] Basic browser automation skeleton
+- [x] Agent-Controller-Browser layered design
+- [x] Configuration management
 
-### 2.1 Mimari
+### Phase 2: Browser Engine (Completed)
+- [x] Full Playwright integration
+- [x] Browser lifecycle management (start, stop, restart)
+- [x] Core actions: goto, click, fill, extract_text, screenshot, scroll
+- [x] Safety controls: URL scheme filtering, timeout handling
+- [x] Human-like behavior: configurable delays
+- [x] Stealth mode support
 
-- `agent/` → Ajan zekâsı, reasoning pipeline
-- `controller/` → Tarayıcı komutlarının orkestrasyonu
-- `browser/` → Web automation iskeleti (şu an skeleton)
-- `config/` → Ajan parametreleri, görev tanımları, model yönlendirmeleri
+### Phase 3: Controller & Basic Agent (Completed)
+- [x] BrowserController for action mapping
+- [x] Loop detection and max-step limits
+- [x] Simple deterministic planner
+- [x] CLI interface (`python -m src`)
+- [x] Working examples (Wikipedia, search)
+- [x] Test suite (68+ tests)
 
-Yapı, nümerik olarak genişlemeye uygun ve ölçeklenebilir.
+### Phase 4: Multi-Agent LLM System (Completed)
+- [x] **LLM Provider Abstraction**
+  - BaseLLMProvider interface
+  - Google Gemini provider (langchain-google-genai)
+  - OpenAI provider (langchain-openai)
+  - AWS Bedrock provider (langchain-aws)
+  - MockLLMProvider for testing
+  - Factory pattern for provider selection
 
-### 2.2 Temel Akış (Flow)
+- [x] **Multi-Agent Architecture**
+  - Orchestrator: Coordinates plan→execute→evaluate loop
+  - PlannerAgent: DOM-aware multi-step planning
+  - ExecutorAgent: Action execution with retry logic
+  - EvaluatorAgent: Result analysis and re-plan triggers
 
-Task → Agent reasoning → Controller → Browser executes → Result → Agent feedback loop
+- [x] **DOM Analysis**
+  - DOMAnalyzer for page structure extraction
+  - Interactive element detection
+  - Form analysis
+  - Selector generation for LLM context
 
-### 2.3 Prompt Yapısı
+- [x] **Configuration**
+  - .env-based API key management
+  - Role-based provider selection
+  - LLMConfig with environment loading
 
-- System prompt
-- Task prompt
-- Action-output formatı
-
-### 2.4 Kodun Durumu / Eksikler
-
-Faz 1 temelde tamamlanmış gözükse de aşağıda eksiklikler var (Faz 2 hedefleri):
-
-- Browser hâlen dummy
-- Controller gerçek aksiyon üretmiyor
-- Agent reasoning tek adımlı
-- Memory yok
-- Tools eksik
-
----
-
-## 3) Faz 2 — TODO Roadmap
-
-Aşağıdaki alt başlıklar Faz 2 kapsamındaki hedeflerdir. VSCode üzerinde bir feature branch açıp adım adım ilerlemeniz önerilir.
-
-### Faz 2.1 — Browser Engine’in Tamamlanması
-
-Browser katmanını Playwright ile etkinleştirin ve temel eylemleri uygulayın:
-
-- Playwright entegrasyonu
-  - Browser launch, Context, Page
-  - Stealth mode, Headless toggle
-- Temel aksiyonlar
-  - `goto(url)`, `click(selector)`, `type(selector, text)`, `wait_for(selector)`
-  - `extract_text(selector)`, `extract_all_links()`, `screenshot()`
-- Error management
-  - Retry wrapper, timeout policy
-
-### Faz 2.2 — Controller’ın Tamamlanması
-
-Controller sorumlulukları:
-
-- Agent tarafından üretilen aksiyonları al ve browser metoduna çevir
-- Sonuçları geri ilet
-
-Yapılacaklar:
-
-- Action parser: Agent çıktısını JSON → method mapping
-- Execution pipeline: Komut al → Browser’a ilet → Completion → Controller response
-- Safety layer: URL filter, infinite loop detection, max step control
-
-### Faz 2.3 — Agent Reasoning Geliştirme
-
-- Multi-step reasoning: Plan → Execute → Reflect
-- Tool-based reasoning: `browser.goto`, `browser.click`, `browser.type`, `browser.extract_text`, `browser.links`
-- Self-correction: Ajan aldığı hataya göre planını güncelleyecek
-
-### Faz 2.4 — Config ve Prompt Geliştirme
-
-- Dynamic task config dosyası (YAML) — her görev için ayrı tanım
-
-```yaml
-task:
-  name: "linkedin profile extraction"
-  target_url: "https://linkedin.com/..."
-  goal: "Extract basic info"
-  constraints:
-    - "No login"
-    - "Max 10 actions"
-```
-
-- System prompt genişletmesi: Kurallar, format, reasoning tarzı
-- Global ayarlar: Model, timeout, max steps, debug mode
-
-### Faz 2.5 — Faz 2 Sonu: İlk Çalışan Senaryo
-
-Hedef senaryo (başarı kriteri):
-
-```
-Git Google'a, "Kaangml GitHub" ara, çıkan ilk linki aç, repository açıklamasını oku ve metni JSON olarak döndür.
-```
-
-Bu senaryo başarılı şekilde çalışırsa Faz 2 tamamlanmış kabul edilecektir.
+- [x] **Documentation**
+  - Updated README with multi-agent examples
+  - QUICKSTART.md for getting started
+  - ARCHITECTURE.md for system design
+  - Working Dockerfile
 
 ---
 
-## 4) VS Code üzerinde çalışma önerileri
+## Current Phase 🚧
 
-1. Yeni bir branch açın (ör. `feature/phase2-browser-agent`).
-2. Taskları sırayla çözün, her ana değişiklik için ayrı commit yapın.
+### Phase 5: Production Readiness
 
-Örnek commit akışı:
+#### 5.1 Persistent Memory
+- [ ] Short-term memory (conversation context)
+- [ ] Long-term memory (SQLite or vector DB)
+- [ ] Task history and learning from past executions
+- [ ] Element selector caching
 
-```bash
-git checkout -b feature/phase2-browser-agent
-git add browser/*
-git commit -m "Browser engine: goto, click, type added"
-```
+#### 5.2 Enhanced Error Handling
+- [ ] Detailed error classification
+- [ ] Automatic recovery strategies
+- [ ] Fallback selector chains
+- [ ] Network error handling
 
-Copilot kullanırken örnek komutlar:
-
-```
-BrowserController için execute_action(action) fonksiyonunu yaz. action.type → browser metodu maplensin.
-Playwright tabanlı async wrapper oluştur, tüm browser fonksiyonlarını tek yerden yönet.
-```
-
-Test dosyası oluşturun: `tests/test_browser.py` ve eylemlerinizin gerçekten çalıştığından emin olun.
+#### 5.3 Logging & Monitoring
+- [ ] Structured logging (JSON format)
+- [ ] Execution metrics and timing
+- [ ] Debug mode with screenshots
+- [ ] Trace export for debugging
 
 ---
 
-## 5) Sonuç
+## Future Phases 📋
 
-Bu doküman Faz 1 durumu, mimari tercihleri, Faz 2 için teknik adımlar ve bir TODO listesi içerir. Artık proje Faz 2 geliştirme dönemine geçmeye uygundur.
+### Phase 6: Advanced Features
+
+#### 6.1 Multi-Tab Support
+- [ ] Tab management (open, close, switch)
+- [ ] Cross-tab data passing
+- [ ] Parallel execution
+
+#### 6.2 Authentication & Sessions
+- [ ] Cookie management
+- [ ] Session persistence
+- [ ] OAuth flow handling
+- [ ] 2FA support (TOTP)
+
+#### 6.3 Advanced Extraction
+- [ ] Table extraction to structured data
+- [ ] Form auto-fill with validation
+- [ ] File download management
+- [ ] PDF extraction
+
+### Phase 7: Integration & Deployment
+
+#### 7.1 Web UI
+- [ ] Task management dashboard
+- [ ] Real-time execution viewer
+- [ ] Result export (JSON, CSV)
+- [ ] Task scheduling
+
+#### 7.2 API Server
+- [ ] REST API for task submission
+- [ ] WebSocket for real-time updates
+- [ ] Authentication and rate limiting
+- [ ] Webhook callbacks
+
+#### 7.3 Job Queue
+- [ ] Redis-based task queue
+- [ ] Worker pool management
+- [ ] Priority scheduling
+- [ ] Retry policies
+
+### Phase 8: Enterprise Features
+
+#### 8.1 Scaling
+- [ ] Kubernetes deployment
+- [ ] Horizontal scaling
+- [ ] Browser pool management
+- [ ] Load balancing
+
+#### 8.2 Security
+- [ ] Audit logging
+- [ ] Role-based access control
+- [ ] Secrets management
+- [ ] VPN/proxy support
+
+#### 8.3 Compliance
+- [ ] GDPR data handling
+- [ ] Data retention policies
+- [ ] Export/delete capabilities
+
+---
+
+## Technical Debt & Improvements
+
+### Code Quality
+- [ ] Increase test coverage to 90%+
+- [ ] Add integration tests with real browser
+- [ ] Performance benchmarking
+- [ ] Memory leak detection
+
+### Developer Experience
+- [ ] Better error messages
+- [ ] Development mode with hot reload
+- [ ] Plugin system for custom actions
+- [ ] VS Code extension for task authoring
+
+---
+
+## Contributing
+
+Contributions are welcome! Please:
+
+1. Check this roadmap for planned features
+2. Open an issue to discuss your idea
+3. Fork and create a feature branch
+4. Submit a PR with tests
+
+Priority areas for contribution:
+- New LLM providers
+- Additional browser actions
+- Documentation improvements
+- Test coverage
+
+---
+
+## Version History
+
+| Version | Date | Highlights |
+|---------|------|------------|
+| 0.1.0 | 2024-11 | Initial structure, basic browser |
+| 0.2.0 | 2024-11 | Playwright integration, controller |
+| 0.3.0 | 2024-11 | CLI, examples, tests |
+| 0.4.0 | 2024-11 | Multi-agent LLM system, Gemini/OpenAI/Bedrock |
