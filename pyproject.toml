@@ -19,12 +19,13 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = [
-    "src/agent",
-    "src/browser",
-    "src/config",
-    "src/controller",
-    "src/examples",
+    "agent",
+    "browser",
+    "config",
+    "controller",
+    "examples",
 ]
+sources = ["src"]
 
 [tool.hatch.build.targets.sdist]
 include = [
