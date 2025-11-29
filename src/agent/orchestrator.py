@@ -158,14 +158,21 @@ Always think step by step and explain your reasoning."""
                 step = self.state.current_plan[self.state.current_step_index]
                 step_result = await self._execute_step(step, page)
                 
+                # Update page reference from result
+                if step_result.get("page"):
+                    page = step_result["page"]
+                
+                # Create serializable result for logging (exclude page object)
+                log_result = {k: v for k, v in step_result.items() if k != "page"}
+                
                 execution_log.append({
                     "phase": "execution",
                     "step": step,
-                    "result": step_result,
+                    "result": log_result,
                 })
                 
                 total_steps += 1
-                self.state.executed_steps.append({"step": step, "result": step_result})
+                self.state.executed_steps.append({"step": step, "result": log_result})
                 
                 # Phase 3: Evaluate
                 self.state.status = TaskStatus.EVALUATING
