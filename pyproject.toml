@@ -17,6 +17,7 @@ dependencies = [
     "langchain-google-genai>=2.0.0",
     "langchain-openai>=0.2.0",
     "pydantic>=2.0.0",
+    "openpyxl>=3.1.5",
 ]
 
 [build-system]
